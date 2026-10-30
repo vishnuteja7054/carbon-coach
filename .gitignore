@@ -1,0 +1,22 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+carbon_coach/.env
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Node / Frontend
+node_modules/
+dist/
+tsconfig.tsbuildinfo
+
+# Local SQLite database
+*.db
+*.sqlite
+*.sqlite3

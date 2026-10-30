@@ -1,0 +1,85 @@
+[
+  {
+    "case_id": "golden_01_kickoff_prompt_en",
+    "language": "English",
+    "user_input": "I travelled 12 km by bus today and used the AC for 4 hours.",
+    "expected_tool_calls": [
+      {
+        "tool": "calculate_travel_emissions",
+        "args": {"mode": "bus", "km": 12},
+        "expected_kg_co2e": 1.068
+      },
+      {
+        "tool": "calculate_electricity_emissions",
+        "args": {"appliance": "ac", "hours": 4},
+        "expected_kg_co2e": 4.296
+      },
+      {
+        "tool": "get_summary",
+        "args": {"period": "today"},
+        "expected_total_kg_co2e": 5.364
+      },
+      {
+        "tool": "suggest_reductions",
+        "args": {"period": "today"},
+        "expected_top_saving_kg_co2e": 1.396
+      }
+    ]
+  },
+  {
+    "case_id": "golden_02_food_and_commute",
+    "language": "English",
+    "user_input": "I rode my petrol bike 8 km, ate a chicken biryani for lunch, and threw away 2 plastic water bottles.",
+    "expected_tool_calls": [
+      {
+        "tool": "calculate_travel_emissions",
+        "args": {"mode": "two_wheeler", "km": 8},
+        "expected_kg_co2e": 0.36
+      },
+      {
+        "tool": "calculate_food_emissions",
+        "args": {"meal_type": "chicken", "servings": 1},
+        "expected_kg_co2e": 2.35
+      },
+      {
+        "tool": "calculate_waste_emissions",
+        "args": {"waste_type": "plastic_bottle", "quantity": 2},
+        "expected_kg_co2e": 0.164
+      }
+    ]
+  },
+  {
+    "case_id": "golden_03_telugu_input",
+    "language": "Telugu",
+    "user_input": "నేను ఈరోజు బస్సులో 12 కి.మీ ప్రయాణించాను మరియు 4 గంటలు AC వాడాను.",
+    "expected_tool_calls": [
+      {
+        "tool": "calculate_travel_emissions",
+        "args": {"mode": "bus", "km": 12},
+        "expected_kg_co2e": 1.068
+      },
+      {
+        "tool": "calculate_electricity_emissions",
+        "args": {"appliance": "ac", "hours": 4},
+        "expected_kg_co2e": 4.296
+      }
+    ]
+  },
+  {
+    "case_id": "golden_04_hindi_input",
+    "language": "Hindi",
+    "user_input": "मैंने आज बस से 12 किमी यात्रा की और 4 घंटे एसी चलाया।",
+    "expected_tool_calls": [
+      {
+        "tool": "calculate_travel_emissions",
+        "args": {"mode": "bus", "km": 12},
+        "expected_kg_co2e": 1.068
+      },
+      {
+        "tool": "calculate_electricity_emissions",
+        "args": {"appliance": "ac", "hours": 4},
+        "expected_kg_co2e": 4.296
+      }
+    ]
+  }
+]

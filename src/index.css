@@ -1,0 +1,803 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes mo-spin {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@keyframes mo-drift {
+  from {
+    transform: translateX(-14%);
+  }
+  to {
+    transform: translateX(14%);
+  }
+}
+
+@keyframes mo-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes mo-dot {
+  0%, 80%, 100% {
+    opacity: .25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes mo-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mo-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes mo-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mo-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes mo-shake {
+  0%, 100% {
+    transform: translate(-50%, -50%);
+  }
+  25% {
+    transform: translate(calc(-50% - 4px), -50%);
+  }
+  75% {
+    transform: translate(calc(-50% + 4px), -50%);
+  }
+}
+
+/* ───────────────────── MorphOrb Stage & Actor Styles ───────────────────── */
+.mo-root {
+  --oCenter: 0;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 620px;
+  overflow: hidden;
+  background: #0d0d10;
+  color: #f4f4f5;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+}
+
+.mo-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.mo-halo {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 380px;
+  height: 380px;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.022) 44%,
+    transparent 70%
+  );
+  opacity: var(--oCenter, 0);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.mo-mover {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 0;
+  height: 0;
+  will-change: transform;
+  z-index: 20;
+}
+
+.mo-trail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 84px;
+  height: 84px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(192, 132, 252, 0.22) 45%,
+    transparent 72%
+  );
+  filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.mo-actor {
+  --w: 560px;
+  --h: 60px;
+  --r: 999px;
+  --oGlow: 1;
+  --oHalo: 0;
+  --oPill: 1;
+  --oBall: 0;
+  --oGreen: 0;
+  --oCard: 0;
+  --oRing: 1;
+  --oInput: 1;
+  --inScale: 1;
+  --oAur: 1;
+  --gs: 0.55;
+  --cs: 1;
+  --hOp: 0;
+  --dotS: 0;
+  --bloom: 1;
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--w);
+  height: var(--h);
+  border-radius: var(--r);
+  transform: translate(-50%, -50%) scale(var(--cs, 1));
+  will-change: width, height, border-radius, transform;
+}
+
+.mo-actor[data-shake] {
+  animation: mo-shake 260ms ease;
+}
+
+/* Allow the unfolded card to expand gracefully for detailed Carbon Coach answers */
+.mo-root[data-phase="answered"] .mo-actor {
+  width: min(640px, calc(100vw - 32px)) !important;
+  height: auto !important;
+  min-height: 120px;
+  max-height: 62vh;
+  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Multi-color ambient underglow beneath the input pill */
+.mo-underglow {
+  position: absolute;
+  inset: -6px -14px -18px -14px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    rgba(52, 211, 153, 0.22) 6%,
+    rgba(244, 114, 182, 0.24) 38%,
+    rgba(139, 92, 246, 0.24) 68%,
+    rgba(234, 179, 8, 0.22) 94%
+  );
+  filter: blur(22px);
+  opacity: var(--oGlow, 1);
+  pointer-events: none;
+}
+
+.mo-halo-green {
+  position: absolute;
+  inset: -28px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.65) 0%, transparent 70%);
+  filter: blur(22px);
+  opacity: var(--oHalo, 0);
+  pointer-events: none;
+}
+
+.mo-surface {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #141418;
+  box-shadow:
+    0 20px 48px -10px rgba(0, 0, 0, 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  opacity: var(--oPill, 1);
+  pointer-events: none;
+}
+
+/* Exact 4-color aurora combination inside the pill:
+   1) Mint/Emerald Green (left)
+   2) Warm Coral/Rose/Amber-Pink (center-left)
+   3) Deep Indigo/Violet/Purple (center-right)
+   4) Warm Gold/Amber (right)
+*/
+.mo-aurora {
+  position: absolute;
+  inset: 0;
+  opacity: var(--oAur, 1);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.mo-aurora i {
+  position: absolute;
+  bottom: -22px;
+  width: 38%;
+  height: 54px;
+  border-radius: 9999px;
+  animation: mo-drift 5.5s ease-in-out infinite alternate;
+}
+
+.mo-aurora i:nth-child(1) {
+  left: 2%;
+  background: radial-gradient(
+    ellipse at 50% 75%,
+    rgba(52, 211, 153, 0.38) 0%,
+    rgba(45, 212, 191, 0.18) 55%,
+    transparent 80%
+  );
+  animation-duration: 4.8s;
+}
+
+.mo-aurora i:nth-child(2) {
+  left: 27%;
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    rgba(244, 114, 182, 0.36) 0%,
+    rgba(251, 146, 60, 0.22) 55%,
+    transparent 80%
+  );
+  animation-duration: 6.2s;
+  animation-direction: alternate-reverse;
+}
+
+.mo-aurora i:nth-child(3) {
+  left: 50%;
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    rgba(139, 92, 246, 0.38) 0%,
+    rgba(99, 102, 241, 0.24) 55%,
+    transparent 80%
+  );
+  animation-duration: 5.4s;
+}
+
+.mo-aurora i:nth-child(4) {
+  left: 70%;
+  background: radial-gradient(
+    ellipse at 50% 75%,
+    rgba(234, 179, 8, 0.34) 0%,
+    rgba(245, 158, 11, 0.18) 55%,
+    transparent 80%
+  );
+  animation-duration: 6.8s;
+}
+
+.mo-ball {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 34% 28%,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(192, 132, 252, 0.22) 38%,
+    rgba(20, 20, 26, 0.96) 78%
+  );
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.65),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25);
+  opacity: var(--oBall, 0);
+  pointer-events: none;
+}
+
+.mo-green {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 38% 32%,
+    #a7f3d0 0%,
+    #34d399 42%,
+    #059669 88%
+  );
+  box-shadow: 0 0 42px rgba(52, 211, 153, 0.65);
+  opacity: var(--oGreen, 0);
+  transform: scale(var(--gs, 0.55));
+  pointer-events: none;
+}
+
+.mo-card {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(24, 24, 29, 0.96) 0%, rgba(15, 15, 19, 0.98) 100%);
+  border: 1px solid rgba(52, 211, 153, calc(0.28 * var(--bloom, 1)));
+  box-shadow:
+    0 24px 60px -12px rgba(0, 0, 0, 0.85),
+    0 0 34px rgba(52, 211, 153, calc(0.14 * var(--bloom, 1))),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  opacity: var(--oCard, 0);
+  pointer-events: none;
+}
+
+/* Prismatic multi-color 1px border ring matching the reference input pill */
+.mo-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--angle),
+    rgba(110, 231, 183, 0.68) 0deg,
+    rgba(56, 189, 248, 0.58) 65deg,
+    rgba(129, 140, 248, 0.54) 130deg,
+    rgba(192, 132, 252, 0.66) 195deg,
+    rgba(244, 114, 182, 0.68) 255deg,
+    rgba(251, 191, 36, 0.66) 310deg,
+    rgba(110, 231, 183, 0.68) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: mo-spin 6s linear infinite;
+  opacity: var(--oRing, 1);
+  pointer-events: none;
+}
+
+.mo-actor[data-typing] .mo-ring {
+  animation-duration: 2.4s;
+}
+
+.mo-input {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  padding: 0 11px 0 20px;
+  opacity: var(--oInput, 1);
+  transform: scale(var(--inScale, 1));
+}
+
+.mo-root:not([data-phase="idle"]) .mo-input {
+  pointer-events: none;
+}
+
+.mo-spark {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.44);
+}
+
+.mo-field {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.mo-field::placeholder {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.mo-send {
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 180ms ease;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mo-send:hover {
+  background: rgba(255, 255, 255, 0.11);
+  color: #ffffff;
+}
+
+.mo-send[data-ready] {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.mo-send svg {
+  width: 18px;
+  height: 18px;
+}
+
+.mo-orb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220px;
+  height: 220px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.mo-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 2px solid rgba(52, 211, 153, 0.75);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 7;
+}
+
+.mo-answer {
+  position: relative;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  max-height: 58vh;
+  overflow-y: auto;
+  padding: 18px 22px;
+  opacity: var(--hOp, 0);
+  outline: none;
+  user-select: text;
+}
+
+.mo-root:not([data-phase="unfold"]):not([data-phase="answered"]) .mo-answer {
+  pointer-events: none;
+  display: none;
+}
+
+.mo-a-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #34d399;
+}
+
+.mo-a-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #34d399;
+  box-shadow: 0 0 10px #34d399;
+  transform: scale(var(--dotS, 0));
+  display: inline-block;
+}
+
+.mo-a-body {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #e4e4e7;
+}
+
+.mo-w {
+  display: inline-block;
+  will-change: opacity, transform, filter;
+}
+
+.mo-status {
+  --sOp: 0;
+  --sTy: 6;
+  position: absolute;
+  left: 50%;
+  top: calc(46% + 92px);
+  transform: translate(-50%, calc(var(--sTy, 6) * 1px));
+  opacity: var(--sOp, 0);
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.mo-lab {
+  position: absolute;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.mo-lab.mo-in {
+  animation: mo-in 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.mo-lab.mo-out {
+  animation: mo-out 220ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.mo-lab-t {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.42) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: mo-shimmer 2.2s linear infinite;
+}
+
+.mo-lab-done {
+  color: #34d399;
+  font-weight: 500;
+}
+
+.mo-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5px;
+  margin-left: 3px;
+}
+
+.mo-dots i {
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.55);
+  display: inline-block;
+  animation: mo-dot 1.2s infinite ease-in-out;
+}
+
+.mo-dots i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.mo-dots i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.mo-reset {
+  position: absolute;
+  left: 50%;
+  bottom: 52px;
+  transform: translateX(-50%) translateY(8px);
+  padding: 9px 18px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(24, 24, 29, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 220ms ease;
+  z-index: 30;
+}
+
+.mo-reset:hover {
+  background: rgba(36, 36, 44, 0.95);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.mo-root[data-phase="answered"] .mo-reset {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.mo-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mo-debug {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(24, 24, 27, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+}
+
+.mo-chip {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  font-weight: 600;
+}
+
+/* ───────────────────── DeepSeek × Apple HIG Refined Theme ───────────────────── */
+.ds-root {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #fbfbfd;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+.ds-heading {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Plus Jakarta Sans", "Inter", sans-serif;
+  letter-spacing: -0.028em;
+}
+
+.ds-mono {
+  font-family: "SF Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle architectural grid + soft periwinkle/indigo ambient glow matching DeepSeek */
+.ds-grid-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgba(77, 107, 254, 0.032) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(77, 107, 254, 0.032) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 40%, transparent 100%);
+}
+
+.ds-ambient-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 62% 54% at 20% 76%, rgba(77, 107, 254, 0.11) 0%, rgba(126, 154, 255, 0.04) 48%, transparent 78%),
+    radial-gradient(ellipse 60% 52% at 80% 78%, rgba(88, 118, 255, 0.10) 0%, rgba(147, 175, 255, 0.04) 50%, transparent 80%),
+    radial-gradient(ellipse 46% 36% at 50% 36%, rgba(77, 107, 254, 0.045) 0%, transparent 70%);
+}
+
+/* Apple-grade glass composer card with specular inner highlight */
+.ds-input-box {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  border: 1px solid rgba(15, 23, 42, 0.075);
+  box-shadow:
+    0 20px 44px -12px rgba(30, 41, 59, 0.065),
+    0 4px 12px -2px rgba(15, 23, 42, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition:
+    border-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ds-input-box:focus-within {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(77, 107, 254, 0.38);
+  box-shadow:
+    0 24px 52px -12px rgba(77, 107, 254, 0.11),
+    0 4px 14px -2px rgba(15, 23, 42, 0.035),
+    0 0 0 3.5px rgba(77, 107, 254, 0.08);
+}
+
+/* Apple Bento Surface Card */
+.apple-surface {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(15, 23, 42, 0.065);
+  box-shadow:
+    0 10px 30px -10px rgba(15, 23, 42, 0.045),
+    0 2px 6px -1px rgba(15, 23, 42, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+/* Apple Segmented Control */
+.apple-segmented {
+  background: rgba(118, 118, 128, 0.09);
+  padding: 2px;
+  border-radius: 9999px;
+}
+
+.apple-segmented-item {
+  border-radius: 9999px;
+  transition: all 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.apple-segmented-item[data-active="true"] {
+  background: #ffffff;
+  color: #1d1d1f;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom subtle scrollbars */
+.ds-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.ds-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ds-scroll::-webkit-scrollbar-thumb {
+  background: rgba(142, 142, 147, 0.25);
+  border-radius: 9999px;
+}
+.ds-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(142, 142, 147, 0.45);
+}
